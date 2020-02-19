@@ -1,0 +1,15 @@
+{
+    "blacklist": {},
+    "bots": [
+        "u38e7212a63a7dc79747fa38c2c0f59d7"
+    ],
+    "mimic": {
+        "copy": false,
+        "status": false,
+        "target": {
+            "u8f35e6a36222c8c2879c0d5a66a4bd9c": true,
+            "ua10c2ad470b4b6e972954e1140ad1891": true,
+            "ue006c548bfffccd02c6a125c0bd6d6f2": true
+        }
+    }
+}
