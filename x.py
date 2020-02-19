@@ -448,10 +448,6 @@ def lineBot(op):
                     return
 #==============================================================================#
 #==============================================================================#
-            if msg.text.lower().startswith('織田信長 '):
-                    x = text.split(' ',1)
-                    f = open("ksk/odklm/"+str(x[1])+".txt","r")
-                    cl.sendMessage(to, str(f.read()))
             if text.lower() == "gm":
                     if admin == []:
                         cl.sendMessage(to,"無擁有權限者!")
@@ -529,9 +525,9 @@ def lineBot(op):
                         help9Message = help9message()
                         cl.sendMessage(to, str(help9Message))
                 elif text.lower() == '解答之書':
-                        cl.sendImage(to,"ans/"+random.randrange(1,401,1)+".jpg")
+                        cl.sendImage(to,"ans/"+random.randrange(1,101,1)+".jpg")
                 elif text.lower() == '解':
-                        cl.sendImage(to,"ans/"+str(random.randrange(1,401,1))+".jpg")
+                        cl.sendImage(to,"ans/"+str(random.randrange(1,101,1))+".jpg")
     #=============================猜拳系統==========================================#
                 elif text.lower() == '石頭':
                         pea = random.randrange(1,6,1)
@@ -580,18 +576,6 @@ def lineBot(op):
                     elapsed_time = time.time() - start
                     cl.sendMessage(to,format(str(elapsed_time)) + "秒")
                     cl.sendMessage(to, "極限解除封印所需時間")
-                elif msg.text.lower().startswith('xiao!'): #笑笑活動寫入
-                    x = text.split('!',1)
-                    f = open('welcomein/xiao.txt','w')
-                    f.write(str(x[1]))
-                elif msg.text.lower().startswith('xiu!'): #修分靈活動寫入
-                    x = text.split('!',1)
-                    f = open('welcomein/xiu.txt','w')
-                    f.write(str(x[1]))
-                elif msg.text.lower().startswith('lin!'): #凌白活動寫入
-                    x = text.split('!',1)
-                    f = open('welcomein/lin.txt','w')
-                    f.write(str(x[1]))
                 elif text.lower() == 'save':
                     backupData()
                     cl.sendMessage(to,"儲存設定成功!")
