@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from ..akad.ttypes import MediaType
+from akad.ttypes import MediaType
 
 def loggedIn(func):
     def checkLogin(*args, **kwargs):
         if args[0].isLogin:
             return func(*args, **kwargs)
         else:
-            args[0].callback.other('You want to call the function, you must login to LINE')
+            args[0].callback.default('You want to call the function, you must login to LINE')
     return checkLogin
     
 class Call(object):
@@ -24,17 +24,9 @@ class Call(object):
         return self.call.acquireGroupCallRoute(groupId, mediaType)
 
     @loggedIn
-    def acquireGroupVideoCallRoute(self, groupId, mediaType=MediaType.VIDEO):
-        return self.call.acquireGroupVideoCallRoute(groupId, mediaType)
-        
-    @loggedIn
     def getGroupCall(self, ChatMid):
         return self.call.getGroupCall(ChatMid)
         
     @loggedIn
     def inviteIntoGroupCall(self, chatId, contactIds=[], mediaType=MediaType.AUDIO):
         return self.call.inviteIntoGroupCall(chatId, contactIds, mediaType)
-
-    @loggedIn
-    def inviteIntoGroupVideoCall(self, chatId, contactIds=[], mediaType=MediaType.VIDEO):
-        return self.call.inviteIntoGroupVideoCall(chatId, contactIds, mediaType)

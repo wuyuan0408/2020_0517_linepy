@@ -5,14 +5,14 @@ class Callback(object):
         self.callback = callback
 
     def PinVerified(self, pin):
-        self.callback("輸入此PIN碼 '" + pin + "'在2分鐘內在您手機的LINE上")
+        self.callback("Input this PIN code '" + pin + "' on your LINE for smartphone in 2 minutes")
 
     def QrUrl(self, url, showQr=True):
         if showQr:
-            notice='或掃描此QR'
+            notice='or scan this QR '
         else:
             notice=''
-        self.callback('打開此鏈接 ' + notice + '在2分鐘內在您手機的LINE上\n' + url)
+        self.callback('Open this link ' + notice + 'on your LINE for smartphone in 2 minutes\n' + url)
         if showQr:
             try:
                 import pyqrcode
