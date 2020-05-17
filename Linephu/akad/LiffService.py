@@ -19,22 +19,18 @@ all_structs = []
 
 
 class Iface(object):
-    def lookupByPhoneNumber(self, countryAreaCode, phoneNumber):
+    def issueLiffView(self, request):
         """
         Parameters:
-         - countryAreaCode
-         - phoneNumber
+         - request
 
         """
         pass
 
-    def lookupNearby(self, location, category, query, countryAreaCode):
+    def revokeToken(self, request):
         """
         Parameters:
-         - location
-         - category
-         - query
-         - countryAreaCode
+         - request
 
         """
         pass
@@ -47,26 +43,24 @@ class Client(Iface):
             self._oprot = oprot
         self._seqid = 0
 
-    def lookupByPhoneNumber(self, countryAreaCode, phoneNumber):
+    def issueLiffView(self, request):
         """
         Parameters:
-         - countryAreaCode
-         - phoneNumber
+         - request
 
         """
-        self.send_lookupByPhoneNumber(countryAreaCode, phoneNumber)
-        return self.recv_lookupByPhoneNumber()
+        self.send_issueLiffView(request)
+        return self.recv_issueLiffView()
 
-    def send_lookupByPhoneNumber(self, countryAreaCode, phoneNumber):
-        self._oprot.writeMessageBegin('lookupByPhoneNumber', TMessageType.CALL, self._seqid)
-        args = lookupByPhoneNumber_args()
-        args.countryAreaCode = countryAreaCode
-        args.phoneNumber = phoneNumber
+    def send_issueLiffView(self, request):
+        self._oprot.writeMessageBegin('issueLiffView', TMessageType.CALL, self._seqid)
+        args = issueLiffView_args()
+        args.request = request
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_lookupByPhoneNumber(self):
+    def recv_issueLiffView(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -74,39 +68,33 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = lookupByPhoneNumber_result()
+        result = issueLiffView_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.e is not None:
             raise result.e
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "lookupByPhoneNumber failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "issueLiffView failed: unknown result")
 
-    def lookupNearby(self, location, category, query, countryAreaCode):
+    def revokeToken(self, request):
         """
         Parameters:
-         - location
-         - category
-         - query
-         - countryAreaCode
+         - request
 
         """
-        self.send_lookupNearby(location, category, query, countryAreaCode)
-        return self.recv_lookupNearby()
+        self.send_revokeToken(request)
+        self.recv_revokeToken()
 
-    def send_lookupNearby(self, location, category, query, countryAreaCode):
-        self._oprot.writeMessageBegin('lookupNearby', TMessageType.CALL, self._seqid)
-        args = lookupNearby_args()
-        args.location = location
-        args.category = category
-        args.query = query
-        args.countryAreaCode = countryAreaCode
+    def send_revokeToken(self, request):
+        self._oprot.writeMessageBegin('revokeToken', TMessageType.CALL, self._seqid)
+        args = revokeToken_args()
+        args.request = request
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_lookupNearby(self):
+    def recv_revokeToken(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -114,22 +102,20 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = lookupNearby_result()
+        result = revokeToken_result()
         result.read(iprot)
         iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
         if result.e is not None:
             raise result.e
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "lookupNearby failed: unknown result")
+        return
 
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
         self._handler = handler
         self._processMap = {}
-        self._processMap["lookupByPhoneNumber"] = Processor.process_lookupByPhoneNumber
-        self._processMap["lookupNearby"] = Processor.process_lookupNearby
+        self._processMap["issueLiffView"] = Processor.process_issueLiffView
+        self._processMap["revokeToken"] = Processor.process_revokeToken
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -146,17 +132,17 @@ class Processor(Iface, TProcessor):
             self._processMap[name](self, seqid, iprot, oprot)
         return True
 
-    def process_lookupByPhoneNumber(self, seqid, iprot, oprot):
-        args = lookupByPhoneNumber_args()
+    def process_issueLiffView(self, seqid, iprot, oprot):
+        args = issueLiffView_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = lookupByPhoneNumber_result()
+        result = issueLiffView_result()
         try:
-            result.success = self._handler.lookupByPhoneNumber(args.countryAreaCode, args.phoneNumber)
+            result.success = self._handler.issueLiffView(args.request)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except TalkException as e:
+        except LiffException as e:
             msg_type = TMessageType.REPLY
             result.e = e
         except TApplicationException as ex:
@@ -167,22 +153,22 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("lookupByPhoneNumber", msg_type, seqid)
+        oprot.writeMessageBegin("issueLiffView", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_lookupNearby(self, seqid, iprot, oprot):
-        args = lookupNearby_args()
+    def process_revokeToken(self, seqid, iprot, oprot):
+        args = revokeToken_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = lookupNearby_result()
+        result = revokeToken_result()
         try:
-            result.success = self._handler.lookupNearby(args.location, args.category, args.query, args.countryAreaCode)
+            self._handler.revokeToken(args.request)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except TalkException as e:
+        except LiffException as e:
             msg_type = TMessageType.REPLY
             result.e = e
         except TApplicationException as ex:
@@ -193,7 +179,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("lookupNearby", msg_type, seqid)
+        oprot.writeMessageBegin("revokeToken", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -201,18 +187,16 @@ class Processor(Iface, TProcessor):
 # HELPER FUNCTIONS AND STRUCTURES
 
 
-class lookupByPhoneNumber_args(object):
+class issueLiffView_args(object):
     """
     Attributes:
-     - countryAreaCode
-     - phoneNumber
+     - request
 
     """
 
 
-    def __init__(self, countryAreaCode=None, phoneNumber=None,):
-        self.countryAreaCode = countryAreaCode
-        self.phoneNumber = phoneNumber
+    def __init__(self, request=None,):
+        self.request = request
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -223,14 +207,10 @@ class lookupByPhoneNumber_args(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 2:
-                if ftype == TType.STRING:
-                    self.countryAreaCode = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.STRING:
-                    self.phoneNumber = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.request = LiffViewRequest()
+                    self.request.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -242,14 +222,10 @@ class lookupByPhoneNumber_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('lookupByPhoneNumber_args')
-        if self.countryAreaCode is not None:
-            oprot.writeFieldBegin('countryAreaCode', TType.STRING, 2)
-            oprot.writeString(self.countryAreaCode.encode('utf-8') if sys.version_info[0] == 2 else self.countryAreaCode)
-            oprot.writeFieldEnd()
-        if self.phoneNumber is not None:
-            oprot.writeFieldBegin('phoneNumber', TType.STRING, 3)
-            oprot.writeString(self.phoneNumber.encode('utf-8') if sys.version_info[0] == 2 else self.phoneNumber)
+        oprot.writeStructBegin('issueLiffView_args')
+        if self.request is not None:
+            oprot.writeFieldBegin('request', TType.STRUCT, 1)
+            self.request.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -267,16 +243,14 @@ class lookupByPhoneNumber_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(lookupByPhoneNumber_args)
-lookupByPhoneNumber_args.thrift_spec = (
+all_structs.append(issueLiffView_args)
+issueLiffView_args.thrift_spec = (
     None,  # 0
-    None,  # 1
-    (2, TType.STRING, 'countryAreaCode', 'UTF8', None, ),  # 2
-    (3, TType.STRING, 'phoneNumber', 'UTF8', None, ),  # 3
+    (1, TType.STRUCT, 'request', [LiffViewRequest, None], None, ),  # 1
 )
 
 
-class lookupByPhoneNumber_result(object):
+class issueLiffView_result(object):
     """
     Attributes:
      - success
@@ -300,13 +274,13 @@ class lookupByPhoneNumber_result(object):
                 break
             if fid == 0:
                 if ftype == TType.STRUCT:
-                    self.success = SpotPhoneNumberResponse()
+                    self.success = LiffViewResponse()
                     self.success.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.e = TalkException()
+                    self.e = LiffException()
                     self.e.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -319,7 +293,7 @@ class lookupByPhoneNumber_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('lookupByPhoneNumber_result')
+        oprot.writeStructBegin('issueLiffView_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -344,29 +318,23 @@ class lookupByPhoneNumber_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(lookupByPhoneNumber_result)
-lookupByPhoneNumber_result.thrift_spec = (
-    (0, TType.STRUCT, 'success', [SpotPhoneNumberResponse, None], None, ),  # 0
-    (1, TType.STRUCT, 'e', [TalkException, None], None, ),  # 1
+all_structs.append(issueLiffView_result)
+issueLiffView_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [LiffViewResponse, None], None, ),  # 0
+    (1, TType.STRUCT, 'e', [LiffException, None], None, ),  # 1
 )
 
 
-class lookupNearby_args(object):
+class revokeToken_args(object):
     """
     Attributes:
-     - location
-     - category
-     - query
-     - countryAreaCode
+     - request
 
     """
 
 
-    def __init__(self, location=None, category=None, query=None, countryAreaCode=None,):
-        self.location = location
-        self.category = category
-        self.query = query
-        self.countryAreaCode = countryAreaCode
+    def __init__(self, request=None,):
+        self.request = request
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -377,25 +345,10 @@ class lookupNearby_args(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 2:
+            if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.location = Location()
-                    self.location.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I32:
-                    self.category = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.STRING:
-                    self.query = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 5:
-                if ftype == TType.STRING:
-                    self.countryAreaCode = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.request = RevokeTokenRequest()
+                    self.request.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -407,22 +360,10 @@ class lookupNearby_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('lookupNearby_args')
-        if self.location is not None:
-            oprot.writeFieldBegin('location', TType.STRUCT, 2)
-            self.location.write(oprot)
-            oprot.writeFieldEnd()
-        if self.category is not None:
-            oprot.writeFieldBegin('category', TType.I32, 3)
-            oprot.writeI32(self.category)
-            oprot.writeFieldEnd()
-        if self.query is not None:
-            oprot.writeFieldBegin('query', TType.STRING, 4)
-            oprot.writeString(self.query.encode('utf-8') if sys.version_info[0] == 2 else self.query)
-            oprot.writeFieldEnd()
-        if self.countryAreaCode is not None:
-            oprot.writeFieldBegin('countryAreaCode', TType.STRING, 5)
-            oprot.writeString(self.countryAreaCode.encode('utf-8') if sys.version_info[0] == 2 else self.countryAreaCode)
+        oprot.writeStructBegin('revokeToken_args')
+        if self.request is not None:
+            oprot.writeFieldBegin('request', TType.STRUCT, 1)
+            self.request.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -440,28 +381,22 @@ class lookupNearby_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(lookupNearby_args)
-lookupNearby_args.thrift_spec = (
+all_structs.append(revokeToken_args)
+revokeToken_args.thrift_spec = (
     None,  # 0
-    None,  # 1
-    (2, TType.STRUCT, 'location', [Location, None], None, ),  # 2
-    (3, TType.I32, 'category', None, None, ),  # 3
-    (4, TType.STRING, 'query', 'UTF8', None, ),  # 4
-    (5, TType.STRING, 'countryAreaCode', 'UTF8', None, ),  # 5
+    (1, TType.STRUCT, 'request', [RevokeTokenRequest, None], None, ),  # 1
 )
 
 
-class lookupNearby_result(object):
+class revokeToken_result(object):
     """
     Attributes:
-     - success
      - e
 
     """
 
 
-    def __init__(self, success=None, e=None,):
-        self.success = success
+    def __init__(self, e=None,):
         self.e = e
 
     def read(self, iprot):
@@ -473,15 +408,9 @@ class lookupNearby_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 0:
+            if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.success = SpotNearbyResponse()
-                    self.success.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.e = TalkException()
+                    self.e = LiffException()
                     self.e.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -494,11 +423,7 @@ class lookupNearby_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('lookupNearby_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRUCT, 0)
-            self.success.write(oprot)
-            oprot.writeFieldEnd()
+        oprot.writeStructBegin('revokeToken_result')
         if self.e is not None:
             oprot.writeFieldBegin('e', TType.STRUCT, 1)
             self.e.write(oprot)
@@ -519,10 +444,10 @@ class lookupNearby_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(lookupNearby_result)
-lookupNearby_result.thrift_spec = (
-    (0, TType.STRUCT, 'success', [SpotNearbyResponse, None], None, ),  # 0
-    (1, TType.STRUCT, 'e', [TalkException, None], None, ),  # 1
+all_structs.append(revokeToken_result)
+revokeToken_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'e', [LiffException, None], None, ),  # 1
 )
 fix_spec(all_structs)
 del all_structs
