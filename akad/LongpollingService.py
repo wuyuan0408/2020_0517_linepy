@@ -19,10 +19,10 @@ all_structs = []
 
 
 class Iface(object):
-    def notify(self, event):
+    def wakeUpLongPolling(self, wakeUpLongPolling):
         """
         Parameters:
-         - event
+         - wakeUpLongPolling
 
         """
         pass
@@ -35,24 +35,24 @@ class Client(Iface):
             self._oprot = oprot
         self._seqid = 0
 
-    def notify(self, event):
+    def wakeUpLongPolling(self, wakeUpLongPolling):
         """
         Parameters:
-         - event
+         - wakeUpLongPolling
 
         """
-        self.send_notify(event)
-        self.recv_notify()
+        self.send_wakeUpLongPolling(wakeUpLongPolling)
+        return self.recv_wakeUpLongPolling()
 
-    def send_notify(self, event):
-        self._oprot.writeMessageBegin('notify', TMessageType.CALL, self._seqid)
-        args = notify_args()
-        args.event = event
+    def send_wakeUpLongPolling(self, wakeUpLongPolling):
+        self._oprot.writeMessageBegin('wakeUpLongPolling', TMessageType.CALL, self._seqid)
+        args = wakeUpLongPolling_args()
+        args.wakeUpLongPolling = wakeUpLongPolling
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_notify(self):
+    def recv_wakeUpLongPolling(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -60,19 +60,21 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = notify_result()
+        result = wakeUpLongPolling_result()
         result.read(iprot)
         iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
         if result.e is not None:
             raise result.e
-        return
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "wakeUpLongPolling failed: unknown result")
 
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
         self._handler = handler
         self._processMap = {}
-        self._processMap["notify"] = Processor.process_notify
+        self._processMap["wakeUpLongPolling"] = Processor.process_wakeUpLongPolling
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -89,17 +91,17 @@ class Processor(Iface, TProcessor):
             self._processMap[name](self, seqid, iprot, oprot)
         return True
 
-    def process_notify(self, seqid, iprot, oprot):
-        args = notify_args()
+    def process_wakeUpLongPolling(self, seqid, iprot, oprot):
+        args = wakeUpLongPolling_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = notify_result()
+        result = wakeUpLongPolling_result()
         try:
-            self._handler.notify(args.event)
+            result.success = self._handler.wakeUpLongPolling(args.wakeUpLongPolling)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
-        except UniversalNotificationServiceException as e:
+        except TalkException as e:
             msg_type = TMessageType.REPLY
             result.e = e
         except TApplicationException as ex:
@@ -110,7 +112,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("notify", msg_type, seqid)
+        oprot.writeMessageBegin("wakeUpLongPolling", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -118,16 +120,16 @@ class Processor(Iface, TProcessor):
 # HELPER FUNCTIONS AND STRUCTURES
 
 
-class notify_args(object):
+class wakeUpLongPolling_args(object):
     """
     Attributes:
-     - event
+     - wakeUpLongPolling
 
     """
 
 
-    def __init__(self, event=None,):
-        self.event = event
+    def __init__(self, wakeUpLongPolling=None,):
+        self.wakeUpLongPolling = wakeUpLongPolling
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -139,9 +141,8 @@ class notify_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 2:
-                if ftype == TType.STRUCT:
-                    self.event = GlobalEvent()
-                    self.event.read(iprot)
+                if ftype == TType.I64:
+                    self.wakeUpLongPolling = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             else:
@@ -153,10 +154,10 @@ class notify_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('notify_args')
-        if self.event is not None:
-            oprot.writeFieldBegin('event', TType.STRUCT, 2)
-            self.event.write(oprot)
+        oprot.writeStructBegin('wakeUpLongPolling_args')
+        if self.wakeUpLongPolling is not None:
+            oprot.writeFieldBegin('wakeUpLongPolling', TType.I64, 2)
+            oprot.writeI64(self.wakeUpLongPolling)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -174,23 +175,25 @@ class notify_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(notify_args)
-notify_args.thrift_spec = (
+all_structs.append(wakeUpLongPolling_args)
+wakeUpLongPolling_args.thrift_spec = (
     None,  # 0
     None,  # 1
-    (2, TType.STRUCT, 'event', [GlobalEvent, None], None, ),  # 2
+    (2, TType.I64, 'wakeUpLongPolling', None, None, ),  # 2
 )
 
 
-class notify_result(object):
+class wakeUpLongPolling_result(object):
     """
     Attributes:
+     - success
      - e
 
     """
 
 
-    def __init__(self, e=None,):
+    def __init__(self, success=None, e=None,):
+        self.success = success
         self.e = e
 
     def read(self, iprot):
@@ -202,9 +205,14 @@ class notify_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
+            if fid == 0:
+                if ftype == TType.BOOL:
+                    self.success = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.e = UniversalNotificationServiceException()
+                    self.e = TalkException()
                     self.e.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -217,7 +225,11 @@ class notify_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('notify_result')
+        oprot.writeStructBegin('wakeUpLongPolling_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.BOOL, 0)
+            oprot.writeBool(self.success)
+            oprot.writeFieldEnd()
         if self.e is not None:
             oprot.writeFieldBegin('e', TType.STRUCT, 1)
             self.e.write(oprot)
@@ -238,10 +250,10 @@ class notify_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(notify_result)
-notify_result.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'e', [UniversalNotificationServiceException, None], None, ),  # 1
+all_structs.append(wakeUpLongPolling_result)
+wakeUpLongPolling_result.thrift_spec = (
+    (0, TType.BOOL, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'e', [TalkException, None], None, ),  # 1
 )
 fix_spec(all_structs)
 del all_structs
